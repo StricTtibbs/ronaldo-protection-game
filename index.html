@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ronaldo Protection Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+            border: 5px solid #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .ui-panel {
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ff4757;
+        }
+
+        .modal-content p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #aaa;
+        }
+
+        .modal-content .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .modal-content .stats div {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .modal-content .stats label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .modal-content .stats span {
+            display: block;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        button.restart-btn {
+            background: #ff4757;
+            font-size: 18px;
+            padding: 15px 40px;
+        }
+
+        button.restart-btn:hover {
+            background: #ff3838;
+        }
+
+        .info-text {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="900" height="600"></canvas>
+
+        <div class="ui-panel">
+            <div class="stat-box">
+                <div class="stat-label">💰 Money</div>
+                <div class="stat-value" id="money">1000</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">👮 Security Guards</div>
+                <div class="stat-value" id="guards">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">❤️ Health</div>
+                <div class="stat-value" id="health">100</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">📅 Day</div>
+                <div class="stat-value" id="day">1</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">⭐ Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🎯 Enemies Defeated</div>
+                <div class="stat-value" id="enemiesDefeated">0</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="hireBtn" onclick="game.hireGuard()">Hire Guard (100💰)</button>
+            <button id="pauseBtn" onclick="game.togglePause()">Pause Game</button>
+            <button onclick="game.reset()">New Game</button>
+        </div>
+
+        <div class="info-text">
+            ℹ️ <strong>How to Play:</strong> Click on enemies to make them go away. Hire security guards to help protect Ronaldo. 
+            Every new day you get 500💰. If Ronaldo's health reaches 0, the game restarts!
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h1>💀 RONALDO DIED!</h1>
+            <p>The game will restart automatically...</p>
+            <div class="stats">
+                <div>
+                    <label>Survived Days</label>
+                    <span id="finalDay">0</span>
+                </div>
+                <div>
+                    <label>Final Score</label>
+                    <span id="finalScore">0</span>
+                </div>
+                <div>
+                    <label>Enemies Defeated</label>
+                    <span id="finalEnemies">0</span>
+                </div>
+                <div>
+                    <label>Hired Guards</label>
+                    <span id="finalGuards">0</span>
+                </div>
+            </div>
+            <button class="restart-btn" onclick="document.getElementById('gameOverModal').classList.remove('active')">Close</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
